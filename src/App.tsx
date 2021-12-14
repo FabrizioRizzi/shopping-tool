@@ -1,25 +1,58 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import {
+  AppBar,
+  Box,
+  Checkbox,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Toolbar,
+  Typography
+} from '@mui/material';
+import { useEffect, useState } from 'react';
+import { spesaSnapshot, startFirebase, updatePurchased } from './firebase';
+import { ShoppingItem } from './interfaces';
+import { onSnapshot } from "firebase/firestore";
 
 function App() {
+  const [spesa, setSpesa] = useState<ShoppingItem[]>([]);
+
+  useEffect(() => {
+    startFirebase();
+
+    const query = spesaSnapshot();
+    const subscription = onSnapshot(query, (querySnapshot) => {
+      setSpesa(querySnapshot.docs.map(doc => ({ ...doc.data() as ShoppingItem, id: doc.id })));
+    });
+
+    return () => subscription();
+  }, [])
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <Box sx={{ flexGrow: 1 }}>
+        <AppBar position="static">
+          <Toolbar>
+            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+              Shopping Tool
+            </Typography>
+          </Toolbar>
+        </AppBar>
+      </Box>
+      <List>
+        {spesa.map((shoppingItem) => (
+          <ListItem key={shoppingItem.id}>
+            <ListItemIcon>
+              <Checkbox
+                checked={shoppingItem.purchased}
+                onChange={(event) => updatePurchased(shoppingItem.id, event.target.checked)}
+              />
+            </ListItemIcon>
+            <ListItemText primary={shoppingItem.description} />
+          </ListItem>
+        ))}
+      </List>
+    </>
   );
 }
 
