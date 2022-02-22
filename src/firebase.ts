@@ -1,5 +1,5 @@
 import { FirebaseApp, initializeApp } from 'firebase/app';
-import { getFirestore, collection, Firestore, query, updateDoc, doc } from 'firebase/firestore';
+import { getFirestore, collection, Firestore, query, updateDoc, doc, addDoc, deleteDoc } from 'firebase/firestore';
 
 export const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_APIKEY,
@@ -21,3 +21,9 @@ export const startFirebase = () => {
 export const spesaSnapshot = () => query(collection(db, "spesa"));
 
 export const updatePurchased = (id: string, purchased: boolean) => updateDoc(doc(db, "spesa", id), { purchased }); 
+
+export const addShoppingItem = async (shoppingItem: {description: string, price: number}) => {
+  await addDoc(collection(db, "spesa"), shoppingItem); 
+};
+
+export const deleteShoppingItem = (id: string) => deleteDoc(doc(db, "spesa", id));
